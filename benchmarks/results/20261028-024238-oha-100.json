@@ -1,0 +1,103 @@
+{
+  "summary": {
+    "successRate": 1.0,
+    "total": 10.0125462,
+    "slowest": 0.0194776,
+    "fastest": 0.000335,
+    "average": 0.0015406032,
+    "requestsPerSec": 100.07444460031556,
+    "totalData": 0,
+    "sizePerRequest": 0,
+    "sizePerSec": 0.0
+  },
+  "metrics": {
+    "success_rate": 1.0,
+    "requests_per_sec": 100.07444460031556,
+    "latency_ms": {
+      "min": 0.335,
+      "mean": 1.541,
+      "p50": 1.242,
+      "p95": 3.253,
+      "p99": 4.625,
+      "max": 19.478
+    }
+  },
+  "responseTimeHistogram": {
+    "0.000335": 1,
+    "0.0022492600000000003": 783,
+    "0.00416352": 199,
+    "0.006077780000000001": 15,
+    "0.00799204": 0,
+    "0.009906300000000002": 0,
+    "0.011820560000000003": 0,
+    "0.013734820000000002": 0,
+    "0.015649080000000003": 1,
+    "0.01756334": 0,
+    "0.0194776": 1
+  },
+  "latencyPercentiles": {
+    "p10": 0.0005483,
+    "p25": 0.0007613,
+    "p50": 0.0012421,
+    "p75": 0.0021553,
+    "p90": 0.0027364,
+    "p95": 0.0032528,
+    "p99": 0.0046248,
+    "p99.9": 0.0194776,
+    "p99.99": 0.0194776
+  },
+  "firstByteHistogram": {
+    "NaN": 0
+  },
+  "firstBytePercentiles": {
+    "p10": null,
+    "p25": null,
+    "p50": null,
+    "p75": null,
+    "p90": null,
+    "p95": null,
+    "p99": null,
+    "p99.9": null,
+    "p99.99": null
+  },
+  "rps": {
+    "mean": null,
+    "stddev": null,
+    "max": null,
+    "min": 31.43873062981165,
+    "percentiles": {
+      "p10": 61.99858643222736,
+      "p25": 63.68128789036629,
+      "p50": 66.79134384184114,
+      "p75": 3311.258278150296,
+      "p90": 22935.779816555067,
+      "p95": 29411.764705612837,
+      "p99": 9999999.994161328,
+      "p99.9": null,
+      "p99.99": null
+    }
+  },
+  "details": {
+    "DNSDialup": {
+      "average": 0.0009111500000000001,
+      "fastest": 0.0004001,
+      "slowest": 0.0038943
+    },
+    "DNSLookup": {
+      "average": 0.00002962,
+      "fastest": 0.0000127,
+      "slowest": 0.0000516
+    },
+    "firstByte": {
+      "average": null,
+      "fastest": null,
+      "slowest": null
+    }
+  },
+  "statusCodeDistribution": {
+    "302": 1000
+  },
+  "errorDistribution": {
+    "aborted due to deadline": 2
+  }
+}

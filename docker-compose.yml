@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: urlshortener
+      POSTGRES_USER: urlshortener
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-urlshortener_dev}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/001_init.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U urlshortener -d urlshortener"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  app:
+    build: .
+    environment:
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 8080
+      PG_DSN: postgresql://urlshortener:${POSTGRES_PASSWORD:-urlshortener_dev}@postgres:5432/urlshortener
+      PG_POOL_SIZE: ${PG_POOL_SIZE:-16}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_POOL_SIZE: ${REDIS_POOL_SIZE:-32}
+      REDIS_CONNECT_TIMEOUT_MS: ${REDIS_CONNECT_TIMEOUT_MS:-500}
+      REDIS_SOCKET_TIMEOUT_MS: ${REDIS_SOCKET_TIMEOUT_MS:-500}
+      REDIS_POOL_WAIT_TIMEOUT_MS: ${REDIS_POOL_WAIT_TIMEOUT_MS:-250}
+      WORKER_THREADS: ${WORKER_THREADS:-32}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+      RATE_LIMIT_FAIL_OPEN_REDIRECT: "true"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -1,0 +1,17 @@
+/build/
+/build-*/
+/.dev/
+/tools/
+
+# Local environment files and secrets
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+*.pfx
+*.p12
+*.log
+
+

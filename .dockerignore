@@ -1,0 +1,11 @@
+.git
+.gitignore
+.dev
+build
+build-*
+benchmarks
+docs
+tools
+tests
+*.log
+.env
