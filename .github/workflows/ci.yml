@@ -74,7 +74,7 @@ jobs:
           sudo ldconfig
 
       - name: Apply database schema
-        run: psql "$PG_DSN" -f migrations/001_init.sql
+        run: psql "$PG_DSN" -v ON_ERROR_STOP=1 -f migrations/001_init.sql
 
       - name: Configure
         run: |
@@ -160,7 +160,7 @@ jobs:
           sudo ldconfig
 
       - name: Apply database schema
-        run: psql "$PG_DSN" -f migrations/001_init.sql
+        run: psql "$PG_DSN" -v ON_ERROR_STOP=1 -f migrations/001_init.sql
 
       - name: Configure
         run: |
@@ -247,7 +247,7 @@ jobs:
           sudo ldconfig
 
       - name: Apply database schema
-        run: psql "$PG_DSN" -f migrations/001_init.sql
+        run: psql "$PG_DSN" -v ON_ERROR_STOP=1 -f migrations/001_init.sql
 
       - name: Configure
         run: |

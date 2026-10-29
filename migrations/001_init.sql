@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS urls (
     deactivated_at TIMESTAMPTZ,
     CONSTRAINT urls_short_code_key UNIQUE (short_code),
     CONSTRAINT urls_short_code_format CHECK (short_code ~ '^[0-9A-Za-z]{1,16}$'),
-    CONSTRAINT urls_original_url_present CHECK length(trim(original_url)) > 0
+    CONSTRAINT urls_original_url_present CHECK (length(trim(original_url)) > 0)
 );
 
 CREATE INDEX IF NOT EXISTS urls_active_expires_at_idx

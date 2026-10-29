@@ -129,7 +129,7 @@ std::string formatLogTimestamp() {
   const auto now = system_clock::now();
   const auto seconds_part = floor<seconds>(now);
   const auto millis = duration_cast<milliseconds>(now - seconds_part).count();
-  char suffix[8];
+  char suffix[32];
   std::snprintf(suffix, sizeof(suffix), ".%03lldZ", static_cast<long long>(millis));
   std::string out = formatRfc3339(seconds_part.time_since_epoch().count());
   out.pop_back();  // drop the trailing 'Z'
