@@ -64,7 +64,7 @@ measure again.
 
 Key facts from the project:
 
-- A redirect performs one Redis rate-limit `EVAL` and one Redis `GET` on a warm cache.
+- A redirect performs one Redis rate-limit `EVALSHA` and one Redis `GET` on a warm cache.
 - The limiter's first request in a window executes `PEXPIRE` inside the same Lua script; later requests only increment.
 - `redis-plus-plus` pipelines opened a connection per call on this platform.
   Avoid reintroducing them without a standalone connection-count test.

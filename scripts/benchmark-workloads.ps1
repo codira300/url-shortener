@@ -32,6 +32,10 @@ if ($Mode -eq 'cold' -and -not (Test-Path $redisCli)) {
   throw 'cold cache mode needs tools\redis\redis-cli.exe to delete seeded cache entries.'
 }
 
+if ($Mode -eq 'cold' -and $Connections -gt 10) {
+  Write-Warning 'Cold-cache runs with duplicate in-flight misses can exceed the single-flight wait and return 503. Prefer -Connections 10 for a clean cold-start sample.'
+}
+
 $resultsDir = if ($OutputDir) { $OutputDir } else { Join-Path $root 'benchmarks\results' }
 New-Item -ItemType Directory -Force -Path $resultsDir | Out-Null
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'

@@ -12,28 +12,27 @@ an in-process circuit breaker prevents a sick Redis from stalling every worker.
 
 ## Measured performance
 
-Current post-change sweep on a 2-core / 4-thread Intel i5-7300U, 8 GB RAM,
-Windows, with the release binary, the load generator co-located, and production
-rate limiting enabled (atomic Lua limiter):
+Current post-change runs on a 2-core / 4-thread Intel i5-7300U, 8 GB RAM,
+Windows, with the release binary, the load generator co-located, and rate
+limiting enabled on every redirect (atomic Lua limiter using cached `EVALSHA`,
+throughput limit raised for the test):
 
 | Offered load | Achieved | p50 | p95 | p99 | Responses | Errors |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 100 RPS | 100.1 | 2.2 ms | 5.1 ms | 7.9 ms | 999 | 0 |
-| 500 RPS | 499.3 | 2.0 ms | 6.8 ms | 11.7 ms | 4,993 | 0 |
-| 1,000 RPS | 999.6 | 2.3 ms | 12.1 ms | 19.8 ms | 9,995 | 0 |
-| 2,500 RPS | 2,493.2 | 4.7 ms | 22.6 ms | 35.2 ms | 24,974 | 0 |
-| 5,000 RPS | 4,879.6 | 18.2 ms | 36.6 ms | 69.8 ms | 73,196 | 0 |
-| 7,500 RPS | 5,026.4 | 18.5 ms | 33.9 ms | 49.0 ms | 75,320 | 0 |
-| 10,000 RPS | **5,349.1** | 17.4 ms | 31.3 ms | 49.9 ms | 80,186 | 0 |
+| 10,000 RPS, run 1 | 7,194.9 | 12.7 ms | 20.9 ms | 38.3 ms | 107,896 | 0 |
+| 10,000 RPS, run 2 | **8,062.3** | 11.3 ms | 18.5 ms | 30.7 ms | 120,882 | 0 |
+| 10,000 RPS, run 3 | 7,479.6 | 12.3 ms | 19.4 ms | 33.9 ms | 112,317 | 0 |
 
-All completed responses were `302`; Redis reported zero errors, zero circuit
-opens, and zero cache-unavailable events. The 10,000 RPS target was not reached
-on this four-thread development machine: the current ceiling is about 5.3k RPS
-with the distributed limiter enabled. The archived pre-Lua baseline reached
-8.1k RPS, so the historical numbers are retained for comparison, not presented
-as a current result. See
+Low-rate runs (100-2,500 offered) met their targets. All completed responses
+were `302`; Redis reported zero errors, zero circuit opens, and zero
+cache-unavailable events. The 10,000 RPS target was not reached on this
+four-thread development machine: the median high-rate result is about 7.5k RPS
+and the best clean run is 8.1k RPS. See
 [docs/performance/results.md](docs/performance/results.md) for methodology and
-raw data.
+raw data, including why the later high-rate sweep was excluded. Workload-shape
+runs measured 1,777 RPS on a 200-URL cold start at 10 connections, 2,496 RPS
+for 500-key high-cardinality traffic at 2,500 offered, and 10,000 `404`
+responses for missing codes at 1,000 offered.
 
 ## Quick start
 
@@ -185,8 +184,9 @@ window_ms = ceil(BURST * 1000 / RPS)
 key       = rl:v2:<scope>:<client-identity>:<window-id>
 ```
 
-Each request performs one atomic Lua `EVAL` that executes `INCR` and, on the
-first increment in a window, `PEXPIRE` for two windows. The counter is kept for
+Each request performs one atomic Lua script via cached `EVALSHA` that executes
+`INCR` and, on the first increment in a window, `PEXPIRE` for two windows. The
+script is loaded once and reloaded automatically on `NOSCRIPT`. The counter is kept for
 two windows. `429` responses include `Retry-After`. The fixed window is
 intentionally simple and connection-reuse safe; the previous Redis pipeline
 approach exhausted ephemeral ports under load (see
@@ -298,11 +298,12 @@ docs/             architecture, operations, research, ADRs
 - Rate limiting is per client identity and per fixed window. Proxies must be
   configured with `TRUST_PROXY` and `TRUSTED_PROXY_CIDRS`; otherwise all clients
   behind a proxy share the proxy's identity.
-- The measured 5.3k RPS is a single-node, co-located-generator result, not a
-  claim about a production cluster. See
+- The measured 7.5k RPS median (8.1k best) is a single-node,
+  co-located-generator result, not a claim about a production cluster. See
   [docs/performance/results.md](docs/performance/results.md).
 - Docker images were authored for Linux/amd64 and are not exercised in this
-  Windows development environment; CI builds and tests the native Linux binary.
+  Windows development environment. CI builds and tests the native Linux binary
+  and includes a Docker Compose smoke-test job.
 
 ## Documentation
 
@@ -317,3 +318,7 @@ docs/             architecture, operations, research, ADRs
 - [Research notes](docs/research/architecture-decisions.md)
 - [Learning guide](docs/learning-guide.md)
 - [Architecture decision records](docs/architecture/decision-records/)
+
+## License
+
+MIT. See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

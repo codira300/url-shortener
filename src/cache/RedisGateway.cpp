@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <exception>
+#include <string>
 
 namespace urlshort {
 namespace {
@@ -262,14 +263,81 @@ RedisEvalResult RedisGateway::evalInt(std::string_view script, const std::vector
   }
   RedisCommandTimer timer(metrics_);
   try {
-    const long long value =
-        redis->eval<long long>(script, keys.begin(), keys.end(), args.begin(), args.end());
+    const std::string script_key(script);
+    std::string sha;
+    {
+      std::lock_guard<std::mutex> lock(script_mutex_);
+      const auto found = script_shas_.find(script_key);
+      if (found != script_shas_.end()) {
+        sha = found->second;
+      }
+    }
+
+    long long value = 0;
+    bool executed = false;
+    bool script_flushed = false;
+    if (!sha.empty()) {
+      try {
+        value = redis->evalsha<long long>(sha, keys.begin(), keys.end(), args.begin(),
+                                          args.end());
+        executed = true;
+      } catch (const sw::redis::Error& error) {
+        if (std::string(error.what()).find("NOSCRIPT") == std::string::npos) {
+          throw;
+        }
+        script_flushed = true;
+      }
+    }
+
+    if (!executed) {
+      std::lock_guard<std::mutex> lock(script_mutex_);
+      if (script_flushed) {
+        sha = redis->script_load(script);
+        script_shas_[script_key] = sha;
+      } else {
+        const auto found = script_shas_.find(script_key);
+        if (found != script_shas_.end()) {
+          sha = found->second;
+        } else {
+          sha = redis->script_load(script);
+          script_shas_.emplace(script_key, sha);
+        }
+      }
+      value = redis->evalsha<long long>(sha, keys.begin(), keys.end(), args.begin(),
+                                        args.end());
+    }
+
     breaker_.recordSuccess();
     return RedisEvalResult{RedisStatus::Ok, value};
   } catch (const std::exception&) {
     metrics_.incRedisError();
     breaker_.recordFailure();
     return RedisEvalResult{RedisStatus::Unavailable, std::nullopt};
+  }
+}
+
+bool RedisGateway::scriptFlush() {
+  if (!breaker_.allow()) {
+    return false;
+  }
+  auto* redis = client();
+  if (redis == nullptr) {
+    breaker_.recordFailure();
+    return false;
+  }
+  RedisCommandTimer timer(metrics_);
+  try {
+    redis->script_flush();
+    {
+      std::lock_guard<std::mutex> lock(script_mutex_);
+      script_shas_.clear();
+    }
+    breaker_.recordSuccess();
+    return true;
+  } catch (const std::exception&) {
+    metrics_.incRedisError();
+    breaker_.recordFailure();
+    return false;
   }
 }
 

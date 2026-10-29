@@ -34,7 +34,7 @@ This is the top-level map. Detailed behavior is split across
                               v             v
                     +----------------+  +---------------------+
                     | Redis          |  | UrlService          |
-                    |  EVAL counter  |  |  cache -> PG        |
+                    |  EVALSHA       |  |  cache -> PG        |
                     |  GET cache     |  |  single-flight      |
                     +-------+--------+  +----------+----------+
                             |                      |
@@ -130,9 +130,10 @@ window_ms = ceil(BURST * 1000 / RPS)
 key       = rl:v2:<scope>:<identity>:<window-id>
 ```
 
-A request performs one atomic Lua `EVAL`: it executes `INCR`, and only when the
-returned count is `1` it executes `PEXPIRE` for two windows. Combining the
-commands avoids a crash window in which a counter exists without a TTL. Counts
+A request performs one atomic Lua script via `EVALSHA`: it executes `INCR`, and
+only when the returned count is `1` it executes `PEXPIRE` for two windows.
+Combining the commands avoids a crash window in which a counter exists without a
+TTL. The script is loaded once and reloaded on `NOSCRIPT`. Counts
 above the burst capacity return `429` with a `Retry-After` derived from the
 remaining window time.
 

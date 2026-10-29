@@ -179,6 +179,26 @@ TEST_CASE("Redis rate limiter rejects requests over capacity") {
   backends.redis.del(key);
 }
 
+TEST_CASE("Redis gateway reloads cached script SHAs after SCRIPT FLUSH") {
+  Backends backends;
+  if (!backends.redisAvailable()) {
+    SKIP("Redis is not available (set REDIS_HOST/REDIS_PORT or start the development cache)");
+  }
+
+  const std::string script = "return 42";
+  const auto first = backends.redis.evalInt(script, {}, {});
+  REQUIRE(first.status == RedisStatus::Ok);
+  REQUIRE(first.integer.has_value());
+  REQUIRE(*first.integer == 42);
+
+  REQUIRE(backends.redis.scriptFlush());
+
+  const auto second = backends.redis.evalInt(script, {}, {});
+  REQUIRE(second.status == RedisStatus::Ok);
+  REQUIRE(second.integer.has_value());
+  REQUIRE(*second.integer == 42);
+}
+
 TEST_CASE("URL service creates, resolves, exposes metadata and deletes") {
   Backends backends;
   if (!backends.postgresAvailable()) {

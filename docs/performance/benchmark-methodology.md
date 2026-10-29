@@ -103,7 +103,7 @@ cache footprint. Use the workload harness:
 .\scripts\benchmark-workloads.ps1 -Mode hot -Rate 5000 -Duration 15s
 
 # Seeded codes, cache keys deleted, then one cold pass and one warm pass
-.\scripts\benchmark-workloads.ps1 -Mode cold -Codes 200 -Connections 50
+.\scripts\benchmark-workloads.ps1 -Mode cold -Codes 200 -Connections 10
 
 # Seeded codes, warmed once, then run with the cache populated
 .\scripts\benchmark-workloads.ps1 -Mode high-cardinality -Codes 500 -Duration 15s
@@ -124,8 +124,11 @@ sample rather than a steady-state cold-miss rate. For a steady-state cold-miss
 rate, rotate through more codes than the number of requests or run with a small
 Redis eviction budget.
 
-No cold-cache or high-cardinality result is claimed in this repository yet;
-these are workloads and scripts, not completed measurements.
+Use low concurrency for the cold pass. With duplicate in-flight misses, joiners
+can exceed the 250 ms per-key single-flight wait and receive `503`; that
+measures the fail-fast policy, not first-hit database latency. Completed
+cold-cache, high-cardinality, and missing-code measurements are in
+[results](results.md).
 
 ## Sanitizer and correctness runs
 

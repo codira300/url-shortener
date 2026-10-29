@@ -19,7 +19,9 @@ so it can decide whether to reject without a second read.
 
 ## Decision
 
-Use one Lua `EVAL` per check:
+Use one Lua script per check. The gateway loads it once with `SCRIPT LOAD`,
+executes it with `EVALSHA`, and reloads on `NOSCRIPT` (for example after a Redis
+restart or `SCRIPT FLUSH`):
 
 ```lua
 local count = redis.call('INCR', KEYS[1])
@@ -47,13 +49,14 @@ Positive:
 
 Negative:
 
-- Every limiter check now invokes Lua, which has some server-side overhead
-  compared with a bare `INCR`.
+- Every limiter check still invokes Lua, which has some server-side overhead
+  compared with a bare `INCR`. Cached `EVALSHA` avoids resending and re-hashing
+  the script, but not Lua execution.
 - The script must be reviewed as code; an error changes the limiter semantics.
-- The historical throughput result predates this change. It cannot be presented
-  as a post-change benchmark without rerunning the harness.
-- Redis script caching should be verified in production (for example,
-  `SCRIPT LOAD`/`EVALSHA` behavior) if the client does not manage it.
+- A Redis restart or `SCRIPT FLUSH` invalidates cached SHAs. The gateway handles
+  the resulting `NOSCRIPT` error by reloading the script once.
+- More than one app instance may race to load the script; Redis returns the same
+  SHA, so the operation remains idempotent.
 
 ## Alternatives
 
@@ -74,5 +77,10 @@ Negative:
   key TTL.
 - `tests/concurrency/test_concurrency.cpp` exercises the limiter with real
   backends.
-- Re-run the redirect benchmark after this change before publishing new
-  throughput numbers.
+- `tests/integration/test_integration.cpp` flushes Redis scripts and confirms
+  that the next `evalInt` reloads the SHA and succeeds.
+- The current Release sweep ran after this change. Three 10,000-offered runs
+  reached 7,195, 8,062, and 7,480 RPS with zero errors; details are in
+  [performance results](../../performance/results.md).
+- A standalone Redis microbenchmark measured 17.2-17.7k commands/s for `EVAL`
+  and 21.2-21.5k for `EVALSHA`.

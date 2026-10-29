@@ -95,8 +95,8 @@ Three approaches were implemented or evaluated:
    pipeline, and safe connection reuse. The window length is derived from burst
    and RPS. It allows a boundary burst of up to two windows' capacity. This is
    the production choice. The increment and first-hit expiry are now one atomic
-   Lua `EVAL`, because two commands leave a crash window where a key exists
-   without a TTL.
+   Lua script invoked with cached `EVALSHA`, because two commands leave a crash
+   window where a key exists without a TTL.
 
 The fixed-window trade-off is documented in
 [ADR 0003](../architecture/decision-records/0003-fixed-window-rate-limiter.md);
@@ -148,11 +148,11 @@ Pre-Lua baseline (2026-10-28):
 - 300 HTTP connections: 7.6k RPS (no gain; more queueing).
 - Rate limiter bypassed: 9,990 RPS.
 
-The current post-change sweep plateaued at 4.9-5.3k RPS with 64/64; 5,349 RPS
-was the best single row at 10,000 offered. This is lower than the archived
-baseline, partly because of the atomic Lua limiter on the hot path and partly
-because the host was not in the same state. Do not compare the two as a clean
-release-to-release regression.
+The current post-change runs reached 7.2-8.1k RPS at 10,000 offered (median
+7,480) with 64/64. The earlier `EVAL` build measured 5,349 RPS; caching the
+script with `EVALSHA` raised Redis command throughput from 17.2-17.7k to
+21.2-21.5k commands/s in a standalone microbenchmark. The host was not isolated,
+so do not compare individual rows as a clean release-to-release regression.
 
 The worker count should not simply track the connection count. Beyond a point,
 context switching and queueing reduce throughput.

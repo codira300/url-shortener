@@ -10,6 +10,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 namespace sw::redis {
@@ -53,6 +54,9 @@ class RedisGateway {
                           const std::vector<std::string>& args);
   bool ping();
 
+  // Administrative/test hook: flushes Redis scripts and the local SHA cache.
+  bool scriptFlush();
+
   bool circuitOpen() const;
 
  private:
@@ -88,6 +92,8 @@ class RedisGateway {
   Logger& logger_;
   CircuitBreaker breaker_;
   std::mutex init_mutex_;
+  std::mutex script_mutex_;
+  std::unordered_map<std::string, std::string> script_shas_;
   std::unique_ptr<sw::redis::Redis> owned_;
   std::atomic<sw::redis::Redis*> client_{nullptr};
 };

@@ -29,5 +29,10 @@
 - [Repository review](research/repository-review.md)
 - [Architecture decisions and measurements](research/architecture-decisions.md)
 
+## Project
+
+- [License](../LICENSE)
+- [Third-party notices](../THIRD_PARTY_NOTICES.md)
+
 The documents describe the current implementation unless a section is explicitly
 marked as a historical baseline.

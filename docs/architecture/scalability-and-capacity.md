@@ -2,11 +2,11 @@
 
 ## Measured envelope
 
-The current post-change sweep ran on a 2-core / 4-thread Intel i5-7300U with
+The current post-change runs used a 2-core / 4-thread Intel i5-7300U with
 8 GB RAM, a co-located `oha` generator, local PostgreSQL, and local Redis. With
-the atomic Lua limiter enabled, the service sustained about **4.9k-5.3k
-redirects/s** and peaked at **5,349 RPS** at 10,000 offered. The 10,000 RPS goal
-was not reached in the production configuration on that host.
+the atomic Lua limiter using cached `EVALSHA`, three consecutive 10,000-offered
+runs reached **7,195, 8,062, and 7,480 RPS** (median **7,480 RPS**). The 10,000
+RPS goal was not reached in the production configuration on that host.
 
 An archived pre-Lua baseline on the same class of hardware reached about 8.1k
 RPS with the limiter enabled and 9,990 RPS with it bypassed. That baseline was
@@ -18,13 +18,19 @@ current release comparison. Full setup and caveats are in
 
 A warm redirect does:
 
-1. One Redis `EVAL` for the fixed-window limiter.
+1. One Redis `EVALSHA` for the fixed-window limiter.
 2. One Redis `GET` for the cache entry.
 3. One HTTP response write.
 
 A cold redirect adds a PostgreSQL lookup and a cache fill, protected by
 single-flight per process. The database is not on the warm path, but it becomes
 the bottleneck if Redis fails because every redirect falls back to it.
+
+On the same host, a 200-URL cold start at 10 connections sustained 1,777 RPS
+with p95 21 ms and 200/200 `302` responses. A 500-key high-cardinality run at
+2,500 offered RPS reached 2,496 RPS with p95 6 ms. These are workload-shape
+checks under host contention, not clean capacity numbers; see
+[performance results](../performance/results.md).
 
 The observed ceiling is therefore a combination of:
 
@@ -35,9 +41,9 @@ The observed ceiling is therefore a combination of:
 
 In the pre-change baseline, more workers did not help: 128 workers / 128 Redis
 connections measured about 7.5k RPS versus 7.9-8.1k with 64/64, and more HTTP
-connections also did not help. The current sweep used 64/64 and plateaued at
-about 5k RPS from 5,000 offered upward. This is a queueing/context-switch
-result, not a reason to keep increasing threads.
+connections also did not help. The current high-rate runs used 64/64 and
+plateaued at about 7.5k-8.1k RPS. This is a queueing/context-switch result, not
+a reason to keep increasing threads.
 
 ## Scaling model
 

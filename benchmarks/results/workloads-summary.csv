@@ -1,0 +1,6 @@
+"timestamp","mode","label","codes","target_rps","connections","achieved_rps","total_requests","status_302","status_404","status_429","status_other","aborted_deadline","p50_ms","p95_ms","p99_ms","max_ms","summary_file"
+"20261029-042630","cold","cold","200","0","10","1777.1","200","200","0","0","0","0","1.844","21.063","55.867","102.08","20261029-042630-workload-cold-cold.json"
+"20261029-042630","cold","warm-after-cold","200","0","10","5404.6","200","200","0","0","0","0","1.47","3.517","4.456","5.355","20261029-042630-workload-cold-warm-after-cold.json"
+"20261029-042438","high-cardinality","high-cardinality","500","2500","50","2495.6","15000","15000","0","0","0","0","1.812","5.97","10.656","42.002","20261029-042438-workload-high-cardinality-high-cardinality.json"
+"20261029-042448","missing","missing","200","1000","50","999.6","10000","0","10000","0","0","0","1.383","9.666","16.867","37.407","20261029-042448-workload-missing-missing.json"
+"20261029-042458","hot","hot","200","2500","50","2498.4","15000","15000","0","0","0","0","2.103","11.96","23.427","55.959","20261029-042458-workload-hot-hot.json"

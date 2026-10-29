@@ -1,0 +1,103 @@
+{
+  "summary": {
+    "successRate": 1.0,
+    "total": 10.0016669,
+    "slowest": 0.2022907,
+    "fastest": 0.0003287,
+    "average": 0.004509400100100098,
+    "requestsPerSec": 99.98333377809253,
+    "totalData": 0,
+    "sizePerRequest": 0,
+    "sizePerSec": 0.0
+  },
+  "metrics": {
+    "success_rate": 1.0,
+    "requests_per_sec": 99.98333377809253,
+    "latency_ms": {
+      "min": 0.329,
+      "mean": 4.509,
+      "p50": 1.427,
+      "p95": 7.833,
+      "p99": 105.273,
+      "max": 202.291
+    }
+  },
+  "responseTimeHistogram": {
+    "0.0003287": 1,
+    "0.020524900000000002": 966,
+    "0.0407211": 11,
+    "0.06091730000000001": 1,
+    "0.0811135": 0,
+    "0.1013097": 6,
+    "0.12150590000000001": 6,
+    "0.1417021": 3,
+    "0.1618983": 2,
+    "0.1820945": 2,
+    "0.2022907": 1
+  },
+  "latencyPercentiles": {
+    "p10": 0.0005864,
+    "p25": 0.0007847,
+    "p50": 0.001427,
+    "p75": 0.0021761,
+    "p90": 0.0035966,
+    "p95": 0.0078327,
+    "p99": 0.1052732,
+    "p99.9": 0.2022907,
+    "p99.99": 0.2022907
+  },
+  "firstByteHistogram": {
+    "NaN": 0
+  },
+  "firstBytePercentiles": {
+    "p10": null,
+    "p25": null,
+    "p50": null,
+    "p75": null,
+    "p90": null,
+    "p95": null,
+    "p99": null,
+    "p99.9": null,
+    "p99.99": null
+  },
+  "rps": {
+    "mean": null,
+    "stddev": null,
+    "max": null,
+    "min": 5.0491178181348335,
+    "percentiles": {
+      "p10": 60.59651206476583,
+      "p25": 63.19714348911167,
+      "p50": 67.59177272942162,
+      "p75": 2242.152466366866,
+      "p90": 18248.17518247459,
+      "p95": 27548.209365978168,
+      "p99": 35335.6890455441,
+      "p99.9": null,
+      "p99.99": null
+    }
+  },
+  "details": {
+    "DNSDialup": {
+      "average": 0.00077493,
+      "fastest": 0.0003782,
+      "slowest": 0.0031473
+    },
+    "DNSLookup": {
+      "average": 0.000041859999999999996,
+      "fastest": 8.9e-6,
+      "slowest": 0.0001866
+    },
+    "firstByte": {
+      "average": null,
+      "fastest": null,
+      "slowest": null
+    }
+  },
+  "statusCodeDistribution": {
+    "302": 999
+  },
+  "errorDistribution": {
+    "aborted due to deadline": 1
+  }
+}

@@ -52,8 +52,8 @@ returns `405` with `Allow`.
 7. Return `302` with `Location`, `Cache-Control: no-store`, and
    `Referrer-Policy: no-referrer`.
 
-A cache hit on this path performs one Redis `GET` and one rate-limit `EVAL`; it
-does not touch PostgreSQL.
+A cache hit on this path performs one Redis `GET` and one rate-limit `EVALSHA`;
+it does not touch PostgreSQL.
 
 ## Create
 

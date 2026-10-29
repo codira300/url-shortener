@@ -89,9 +89,9 @@ forward only trusted headers.
 
 ## Dependency and license review
 
-This repository has no project `LICENSE` file. Add one before distributing the
-source or binaries. The main third-party components and their common licenses
-are:
+This repository is distributed under the MIT License; see `LICENSE` and
+`THIRD_PARTY_NOTICES.md`. The main third-party components and their common
+licenses are:
 
 | Component | Typical license | Notes |
 | --- | --- | --- |

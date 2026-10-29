@@ -43,7 +43,9 @@ Negative:
   tombstone expires, the first read goes to PostgreSQL and confirms the delete.
 - Negative entries can briefly hide a URL created immediately after a miss;
   the short negative TTL bounds the window.
-- Lua is used on write/fill paths. It is not used on the redirect read path.
+- Lua is used for conditional cache fills and, after ADR 0005, for the atomic
+  rate-limit counter on the redirect path. The cache read itself remains a
+  plain `GET`.
 - A Redis outage means every redirect hits PostgreSQL; single-flight helps but
   does not remove the load.
 
